@@ -48,7 +48,10 @@ post_tag = db.Table('post_tag',
 # Load a user from the database for login
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return User.query.get(int(user_id))
+    except Exception as e:
+        return None
 
 @app.route('/')
 def index():
