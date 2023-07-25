@@ -262,13 +262,6 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-# User profile route
-@app.route('/profile/<int:user_id>')
-@login_required
-def profile(user_id):
-    user = User.query.get_or_404(user_id)
-    return render_template('profile.html', user=user)
-
 # Follow user route
 @app.route('/follow/<int:user_id>')
 @login_required
