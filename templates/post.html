@@ -13,11 +13,25 @@
   </form>
   <ul>
     {% for comment in post.comments %}
-      {% if comment.is_approved %}
-        <li>{{ comment.content }} - {{ comment.author.username }}</li>
-      {% else %}
-        <li>Pending moderation</li>
-      {% endif %}
+      <li>
+        {% if comment.is_approved %}
+          {{ comment.content }} - {{ comment.author.username }}
+        {% else %}
+          <i>Pending moderation</i>
+        {% endif %}
+
+        {% if current_user.is_authenticated and current_user.is_admin %}
+          {% if not comment.is_approved %}
+            <form action="/approve_comment/{{ comment.id }}" method="post" style="display: inline;">
+              <button type="submit">Approve</button>
+            </form>
+          {% else %}
+            <form action="/disapprove_comment/{{ comment.id }}" method="post" style="display: inline;">
+              <button type="submit">Disapprove</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </li>
     {% endfor %}
   </ul>
 {% endblock %}

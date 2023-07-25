@@ -159,8 +159,31 @@ def register():
         db.session.commit()
         flash('Registration successful!', 'success')
         return redirect(url_for('login'))
-    
     return render_template('register.html')
+
+@app.route('/approve_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def approve_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    # Check if the user is an admin before approving the comment
+    if current_user.is_admin:
+        comment.is_approved = True
+        db.session.commit()
+
+    return redirect(url_for('post', post_id=comment.post_id))
+
+@app.route('/disapprove_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def disapprove_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+
+    # Check if the user is an admin before disapproving the comment
+    if current_user.is_admin:
+        comment.is_approved = False
+        db.session.commit()
+    return redirect(url_for('post', post_id=comment.post_id))
+
 
 
 if __name__ == '__main__':
