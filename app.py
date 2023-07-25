@@ -16,6 +16,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
 
 # Create the Comment model
 class Comment(db.Model):
@@ -110,6 +111,28 @@ def logout():
 def profile(user_id):
     user = User.query.get_or_404(user_id)
     return render_template('profile.html', user=user)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        full_name = request.form['full_name']
+        is_admin = 'is_admin' in request.form
+
+        # Check if the username is available
+        if User.query.filter_by(username=username).first():
+            flash('Username already taken.', 'error')
+            return redirect(url_for('register'))
+
+        user = User(username=username, password=password, full_name=full_name, is_admin=is_admin)
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful!', 'success')
+        return redirect(url_for('login'))
+    
+    return render_template('register.html')
+
 
 if __name__ == '__main__':
     with app.app_context():
