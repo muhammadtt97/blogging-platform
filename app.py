@@ -96,7 +96,7 @@ def create():
         else:
             image_url = None
 
-        post = Post(title=title, content=content, author=current_user, tags=tags)
+        post = Post(title=title, content=content, author=current_user, tags=tags, image=image_url)
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('index'))
