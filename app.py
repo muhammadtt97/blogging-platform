@@ -106,6 +106,11 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/profile/<int:user_id>')
+def profile(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template('profile.html', user=user)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
