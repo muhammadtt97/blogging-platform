@@ -29,6 +29,7 @@ class Comment(db.Model):
     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', backref=db.backref('comments', lazy=True))
+    is_approved = db.Column(db.Boolean, default=False)
 
 # Create the Post model
 class Post(db.Model):

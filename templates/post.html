@@ -13,7 +13,11 @@
   </form>
   <ul>
     {% for comment in post.comments %}
-      <li>{{ comment.content }} - {{ comment.author.username }}</li>
+      {% if comment.is_approved %}
+        <li>{{ comment.content }} - {{ comment.author.username }}</li>
+      {% else %}
+        <li>Pending moderation</li>
+      {% endif %}
     {% endfor %}
   </ul>
 {% endblock %}
