@@ -1,24 +1,18 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>Welcome to the Blogging Platform</h1>
-  <form action="/" method="post">
-    <input type="text" name="search_query" placeholder="Search...">
-    <button type="submit">Search</button>
-  </form>
-  {% for post in posts.items %}
-    <div class="post">
-      <h2>{{ post.title }}</h2>
-      <p>{{ post.content }}</p>
-      <p>Author: {{ post.author.username }}</p>
-    </div>
-  {% endfor %}
-  <div class="pagination">
-    {% if posts.has_prev %}
-      <a href="{{ url_for('index', page=posts.prev_num) }}">Previous</a>
-    {% endif %}
-    {% if posts.has_next %}
-      <a href="{{ url_for('index', page=posts.next_num) }}">Next</a>
-    {% endif %}
-  </div>
+  <h1>Welcome to the Blog</h1>
+  {% if posts %}
+    <ul>
+      {% for post in posts %}
+        <li>
+          <h2><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
+          <p>{{ generate_excerpt(post.content) }}</p>
+          <p>Author: {{ post.author.username }} | Published on: {{ post.created_at.strftime('%Y-%m-%d') }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No published posts found.</p>
+  {% endif %}
 {% endblock %}

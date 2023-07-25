@@ -47,6 +47,8 @@ class Post(db.Model):
     tags = db.relationship('Tag', secondary='post_tag', backref=db.backref('posts', lazy=True))
     image = db.Column(db.String(255))  # File path of the uploaded image
     status = db.Column(db.String(10), default='draft')  # 'draft', 'published', or 'archived'
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)  # Add the created_at attribute
+
 
 # Create the Tag model
 class Tag(db.Model):
@@ -85,17 +87,22 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+# Function to generate post excerpts
+def generate_excerpt(content, max_length=200):
+    if len(content) <= max_length:
+        return content
+    else:
+        # Find the last space within the max_length to avoid cutting off words
+        last_space_index = content.rfind(' ', 0, max_length)
+        return content[:last_space_index] + '...'
+    
+    def __repr__(self):
+        return f"Post('{self.title}', '{self.author.username}', '{self.created_at}')"
+
+
 @app.route('/',methods=['GET', 'POST'])
 def index():
-    page = request.args.get('page', 1, type=int)
-    posts_per_page = 5  # Number of blog posts per page
-
-    if request.method == 'POST':
-        search_query = request.form.get('search_query', '')
-        posts = Post.query.filter(Post.title.contains(search_query) | Post.content.contains(search_query)).paginate(page=page, per_page=posts_per_page)
-    else:
-        posts = Post.query.order_by(Post.id.desc()).paginate(page=page, per_page=posts_per_page)
-
+    posts = Post.query.filter_by(status='published').order_by(Post.created_at.desc()).all()
     return render_template('index.html', posts=posts)
 
 @app.route('/create', methods=['GET', 'POST'])
