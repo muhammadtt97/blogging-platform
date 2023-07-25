@@ -156,6 +156,11 @@ def edit(post_id):
 
     return render_template('edit.html', post=post, tags=Tag.query.all())
 
+@app.route('/archives')
+def archives():
+    posts = Post.query.filter_by(status='published').order_by(Post.created_at.desc()).all()
+    return render_template('archives.html', posts=posts)
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
