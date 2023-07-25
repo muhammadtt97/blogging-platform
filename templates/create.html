@@ -7,8 +7,12 @@
     <input type="text" id="title" name="title" required>
     <label for="content">Content:</label>
     <textarea id="content" name="content" required></textarea>
-    <label for="author">Author:</label>
-    <input type="text" id="author" name="author" required>
+    <label for="tags">Tags:</label>
+    <select id="tags" name="tags" multiple>
+      {% for tag in tags %}
+        <option value="{{ tag.id }}">{{ tag.name }}</option>
+      {% endfor %}
+    </select>
     <button type="submit">Submit</button>
   </form>
 {% endblock %}
