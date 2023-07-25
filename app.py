@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
+from datetime import datetime
 import os
 
 app = Flask(__name__)
@@ -57,6 +58,18 @@ post_tag = db.Table('post_tag',
     db.Column('post_id', db.Integer, db.ForeignKey('post.id'), primary_key=True),
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
 )
+
+# Follows model to represent user-to-user follows
+class Follows(db.Model):
+    follower_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    followed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Likes model to represent post likes
+class Like(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
 
 # Load a user from the database for login
 @login_manager.user_loader
@@ -248,6 +261,60 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+# User profile route
+@app.route('/profile/<int:user_id>')
+@login_required
+def profile(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template('profile.html', user=user)
+
+# Follow user route
+@app.route('/follow/<int:user_id>')
+@login_required
+def follow_user(user_id):
+    user_to_follow = User.query.get_or_404(user_id)
+    if user_to_follow != current_user:
+        current_user.following.append(user_to_follow)
+        db.session.commit()
+        flash(f'You are now following {user_to_follow.username}.', 'success')
+    return redirect(url_for('profile', user_id=user_id))
+
+# Unfollow user route
+@app.route('/unfollow/<int:user_id>')
+@login_required
+def unfollow_user(user_id):
+    user_to_unfollow = User.query.get_or_404(user_id)
+    if user_to_unfollow != current_user:
+        current_user.following.remove(user_to_unfollow)
+        db.session.commit()
+        flash(f'You have unfollowed {user_to_unfollow.username}.', 'success')
+    return redirect(url_for('profile', user_id=user_id))
+
+# Like post route
+@app.route('/like/<int:post_id>')
+@login_required
+def like_post(post_id):
+    post_to_like = Post.query.get_or_404(post_id)
+    if post_to_like not in current_user.likes:
+        like = Like(user_id=current_user.id, post_id=post_id)
+        db.session.add(like)
+        db.session.commit()
+        flash('You liked the post.', 'success')
+    return redirect(url_for('post', post_id=post_id))
+
+# Unlike post route
+@app.route('/unlike/<int:post_id>')
+@login_required
+def unlike_post(post_id):
+    post_to_unlike = Post.query.get_or_404(post_id)
+    like = Like.query.filter_by(user_id=current_user.id, post_id=post_id).first()
+    if like:
+        db.session.delete(like)
+        db.session.commit()
+        flash('You unliked the post.', 'success')
+    return redirect(url_for('post', post_id=post_id))
+
 
 if __name__ == '__main__':
     with app.app_context():

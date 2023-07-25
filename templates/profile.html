@@ -4,10 +4,28 @@
   <h1>User Profile</h1>
   <p>Username: {{ user.username }}</p>
   <p>Full Name: {{ user.full_name }}</p>
-  <h2>Your Posts</h2>
+
+  {% if current_user != user %}
+    {% if user in current_user.following %}
+      <a href="{{ url_for('unfollow_user', user_id=user.id) }}">Unfollow</a>
+    {% else %}
+      <a href="{{ url_for('follow_user', user_id=user.id) }}">Follow</a>
+    {% endif %}
+  {% endif %}
+
+  <h2>Posts by {{ user.username }}</h2>
   <ul>
     {% for post in user.posts %}
-      <li>{{ post.title }} - {{ post.content }}</li>
+      <li>
+        <a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a> - {{ post.created_at.strftime('%Y-%m-%d') }}
+        {% if current_user.is_authenticated %}
+          {% if post in current_user.likes %}
+            <a href="{{ url_for('unlike_post', post_id=post.id) }}">Unlike</a>
+          {% else %}
+            <a href="{{ url_for('like_post', post_id=post.id) }}">Like</a>
+          {% endif %}
+        {% endif %}
+      </li>
     {% endfor %}
   </ul>
 {% endblock %}
