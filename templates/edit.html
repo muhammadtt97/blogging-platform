@@ -4,7 +4,9 @@
   <h1>Edit Post</h1>
   <form action="/edit/{{ post.id }}" method="post" enctype="multipart/form-data">
     <!-- Existing form fields (title, content, tags, image) -->
-
+    <label for="tags">Tags:</label>
+    <input type="text" id="tags" name="tags" value="{% for tag in post.tags %}{{ tag.name }}{% if not loop.last %}, {% endif %}{% endfor %}">
+    
     <label for="status">Status:</label>
     <select id="status" name="status">
       <option value="draft" {% if post.status == 'draft' %}selected{% endif %}>Draft</option>
@@ -14,4 +16,19 @@
     <button type="submit">Save as Draft</button>
     <button type="submit" name="status" value="published">Publish</button>
   </form>
+
+  
+  <script>
+    $(function() {
+      var tags = [
+        {% for tag in tags %}
+          "{{ tag.name }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      $("#tags").autocomplete({
+        source: tags
+      });
+    });
+  </script>
 {% endblock %}

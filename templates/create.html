@@ -24,4 +24,19 @@
     <button type="submit">Save as Draft</button>
     <button type="submit" name="status" value="published">Publish</button>
   </form>
+
+  <script>
+    $(function() {
+      var tags = [
+        {% for tag in tags %}
+          "{{ tag.name }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ];
+
+      $("#tags").autocomplete({
+        source: tags
+      });
+    });
+  </script>
+  
 {% endblock %}
