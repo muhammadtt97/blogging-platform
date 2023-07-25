@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Edit Post</h1>
+  <form action="/edit/{{ post.id }}" method="post" enctype="multipart/form-data">
+    <!-- Existing form fields (title, content, tags, image) -->
+
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+      <option value="draft" {% if post.status == 'draft' %}selected{% endif %}>Draft</option>
+      <option value="published" {% if post.status == 'published' %}selected{% endif %}>Published</option>
+    </select>
+
+    <button type="submit">Save as Draft</button>
+    <button type="submit" name="status" value="published">Publish</button>
+  </form>
+{% endblock %}

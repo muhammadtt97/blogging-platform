@@ -15,6 +15,13 @@
     </select>
     <label for="image">Image:</label>
     <input type="file" id="image" name="image">
-    <button type="submit">Submit</button>
+    <label for="status">Status:</label>
+    <select id="status" name="status">
+      <option value="draft">Draft</option>
+      <option value="published">Published</option>
+    </select>
+
+    <button type="submit">Save as Draft</button>
+    <button type="submit" name="status" value="published">Publish</button>
   </form>
 {% endblock %}

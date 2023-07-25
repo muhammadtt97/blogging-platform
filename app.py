@@ -45,6 +45,7 @@ class Post(db.Model):
     author = db.relationship('User', backref=db.backref('posts', lazy=True))
     tags = db.relationship('Tag', secondary='post_tag', backref=db.backref('posts', lazy=True))
     image = db.Column(db.String(255))  # File path of the uploaded image
+    status = db.Column(db.String(10), default='draft')  # 'draft', 'published', or 'archived'
 
 # Create the Tag model
 class Tag(db.Model):
@@ -107,8 +108,53 @@ def create():
         post = Post(title=title, content=content, author=current_user, tags=tags, image=image_url)
         db.session.add(post)
         db.session.commit()
+
+        if status == 'draft':
+            flash('Post saved as draft.', 'success')
+            return redirect(url_for('drafts'))
+        else:
+            flash('Post published successfully!', 'success')
         return redirect(url_for('index'))
     return render_template('create.html', tags=Tag.query.all())
+
+@app.route('/drafts')
+@login_required
+def drafts():
+    drafts = Post.query.filter_by(author=current_user, status='draft').all()
+    return render_template('drafts.html', drafts=drafts)
+
+@app.route('/edit/<int:post_id>', methods=['GET', 'POST'])
+@login_required
+def edit(post_id):
+    post = Post.query.get_or_404(post_id)
+
+    # Check if the user is the author of the post
+    if post.author != current_user:
+        flash('You are not authorized to edit this post.', 'error')
+        return redirect(url_for('post', post_id=post.id))
+
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        tags = [Tag.query.get(int(tag)) for tag in request.form.getlist('tags')]
+        status = request.form['status']
+        
+        # Image upload handling (similar to create route)
+
+        post.title = title
+        post.content = content
+        post.tags = tags
+        post.status = status
+        db.session.commit()
+
+        if status == 'draft':
+            flash('Post saved as draft.', 'success')
+            return redirect(url_for('drafts'))
+        else:
+            flash('Post updated successfully!', 'success')
+            return redirect(url_for('post', post_id=post.id))
+
+    return render_template('edit.html', post=post, tags=Tag.query.all())
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
