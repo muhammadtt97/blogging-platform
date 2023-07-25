@@ -34,6 +34,7 @@ class Post(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     author = db.relationship('User', backref=db.backref('posts', lazy=True))
     tags = db.relationship('Tag', secondary='post_tag', backref=db.backref('posts', lazy=True))
+    image = db.Column(db.String(255))  # File path of the uploaded image
 
 # Create the Tag model
 class Tag(db.Model):
