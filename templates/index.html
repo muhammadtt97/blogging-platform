@@ -2,11 +2,20 @@
 
 {% block content %}
   <h1>Welcome to the Blogging Platform</h1>
-  {% for post in posts %}
+  {% for post in posts.items %}
     <div class="post">
       <h2>{{ post.title }}</h2>
       <p>{{ post.content }}</p>
-      <p>Author: {{ post.author }}</p>
+      <p>Author: {{ post.author.username }}</p>
     </div>
   {% endfor %}
+
+  <div class="pagination">
+    {% if posts.has_prev %}
+      <a href="{{ url_for('index', page=posts.prev_num) }}">Previous</a>
+    {% endif %}
+    {% if posts.has_next %}
+      <a href="{{ url_for('index', page=posts.next_num) }}">Next</a>
+    {% endif %}
+  </div>
 {% endblock %}
