@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
+import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'  # Replace with a strong secret key
@@ -55,6 +57,12 @@ def load_user(user_id):
     except Exception as e:
         return None
 
+#Image upload
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route('/',methods=['GET', 'POST'])
 def index():
     page = request.args.get('page', 1, type=int)
@@ -75,11 +83,28 @@ def create():
         title = request.form['title']
         content = request.form['content']
         tags = [Tag.query.get(int(tag)) for tag in request.form.getlist('tags')]
+        # Image upload handling
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                image_url = url_for('uploaded_file', filename=filename)
+            else:
+                flash('Invalid file format. Allowed formats are PNG, JPG, JPEG, and GIF.', 'error')
+                return redirect(url_for('create'))
+        else:
+            image_url = None
+
         post = Post(title=title, content=content, author=current_user, tags=tags)
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('index'))
     return render_template('create.html', tags=Tag.query.all())
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 @app.route('/post/<int:post_id>', methods=['GET', 'POST'])
 def post(post_id):
