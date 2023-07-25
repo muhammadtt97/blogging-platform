@@ -5,6 +5,14 @@
   <p>{{ post.content }}</p>
   <p>Author: {{ post.author.username }}</p>
 
+   <!-- Social media sharing links -->
+   <div class="social-media-sharing">
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.url }}" target="_blank">Share on Facebook</a>
+    <a href="https://twitter.com/intent/tweet?url={{ request.url }}&text={{ post.title }}" target="_blank">Share on Twitter</a>
+    <a href="https://www.linkedin.com/shareArticle?url={{ request.url }}&title={{ post.title }}" target="_blank">Share on LinkedIn</a>
+    <a href="whatsapp://send?text={{ post.title }}%20{{ request.url }}" target="_blank">Share on WhatsApp</a>
+  </div>
+
   <h2>Comments</h2>
   <form action="/post/{{ post.id }}" method="post">
     <label for="content">Add a comment:</label>
