@@ -1,12 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h1>User Profile - {{ user.full_name }}</h1>
-  <h2>Posts by {{ user.username }}</h2>
-  {% for post in user.posts %}
-    <div class="post">
-      <h3>{{ post.title }}</h3>
-      <p>{{ post.content }}</p>
-    </div>
-  {% endfor %}
+  <h1>User Profile</h1>
+  <p>Username: {{ user.username }}</p>
+  <p>Full Name: {{ user.full_name }}</p>
+  <h2>Your Posts</h2>
+  <ul>
+    {% for post in user.posts %}
+      <li>{{ post.title }} - {{ post.content }}</li>
+    {% endfor %}
+  </ul>
 {% endblock %}

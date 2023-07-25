@@ -7,14 +7,14 @@
     <input type="text" id="title" name="title" required>
     <label for="content">Content:</label>
     <textarea id="content" name="content" required></textarea>
-    <label for="image">Image:</label>
-    <input type="file" id="image" name="image">
     <label for="tags">Tags:</label>
     <select id="tags" name="tags" multiple>
       {% for tag in tags %}
         <option value="{{ tag.id }}">{{ tag.name }}</option>
       {% endfor %}
     </select>
+    <label for="image">Image:</label>
+    <input type="file" id="image" name="image">
     <button type="submit">Submit</button>
   </form>
 {% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Welcome, {{ user.username }}!</h1>
+  <h2>Your Dashboard</h2>
+  <p>Here, you can manage your account and posts.</p>
+  <ul>
+    <li><a href="{{ url_for('profile', user_id=user.id) }}">View Profile</a></li>
+    <li><a href="{{ url_for('create') }}">Create Post</a></li>
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+  </ul>
+{% endblock %}

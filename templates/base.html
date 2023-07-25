@@ -12,19 +12,31 @@
       // ... (customize TinyMCE settings as needed)
     });
   </script>
-
 </head>
 <body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="/">Home</a></li>
-        <li><a href="/create">Create</a></li>
+  <nav>
+    <ul>
+      <li><a href="{{ url_for('index') }}">Home</a></li>
+      <li><a href="{{ url_for('create') }}">Create Post</a></li>
+      {% if current_user.is_authenticated %}
+        <li><a href="{{ url_for('profile', user_id=current_user.id) }}">Profile</a></li>
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}">Login</a></li>
+        <li><a href="{{ url_for('register') }}">Register</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flash-messages">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
       </ul>
-    </nav>
-  </header>
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
 </body>
 </html>
