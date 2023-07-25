@@ -52,6 +52,9 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
+    page = request.args.get('page', 1, type=int)
+    posts_per_page = 5  # Number of blog posts per page
+    posts = Post.query.order_by(Post.id.desc()).paginate(page=page, per_page=posts_per_page)
     return render_template('index.html', posts=posts)
 
 @app.route('/create', methods=['GET', 'POST'])
