@@ -4,6 +4,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate
 from datetime import datetime
+from flask import request, jsonify
 import os
 
 app = Flask(__name__)
@@ -185,15 +186,30 @@ def archives():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/post/<int:post_id>', methods=['GET', 'POST'])
-def post(post_id):
-    post = Post.query.get(post_id)
-    if request.method == 'POST':
-        content = request.form['content']
-        comment = Comment(content=content, post=post, author=current_user)
-        db.session.add(comment)
-        db.session.commit()
-    return render_template('post.html', post=post)
+@app.route('/get_posts')
+def get_posts():
+    # Get the page number from the request
+    page = request.args.get('page', 1, type=int)
+    per_page = 5  # Number of posts to load per page
+
+    # Filter published posts and order them by date (most recent first)
+    posts = Post.query.filter_by(status='published').order_by(Post.created_at.desc())
+
+    # Apply pagination
+    paginated_posts = posts.paginate(page=page, per_page=per_page)
+
+    # Serialize the posts for JSON response
+    serialized_posts = []
+    for post in paginated_posts.items:
+        serialized_posts.append({
+            'id': post.id,
+            'title': post.title,
+            'content': post.content,
+            'author': post.author.username,
+            'created_at': post.created_at.strftime('%Y-%m-%d')
+        })
+
+    return jsonify(posts=serialized_posts, has_next=paginated_posts.has_next)
 
 @app.route('/approve_comment/<int:comment_id>', methods=['POST'])
 @login_required

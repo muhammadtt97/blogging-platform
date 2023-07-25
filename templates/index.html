@@ -2,17 +2,59 @@
 
 {% block content %}
   <h1>Welcome to the Blog</h1>
-  {% if posts %}
-    <ul>
-      {% for post in posts %}
-        <li>
-          <h2><a href="{{ url_for('post', post_id=post.id) }}">{{ post.title }}</a></h2>
-          <p>{{ generate_excerpt(post.content) }}</p>
-          <p>Author: {{ post.author.username }} | Published on: {{ post.created_at.strftime('%Y-%m-%d') }}</p>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p>No published posts found.</p>
-  {% endif %}
+  <div id="posts-container">
+    <!-- Posts will be loaded here -->
+    {% include 'post_card.html' %}
+  </div>
+  <div id="loading" style="display: none;">Loading...</div>
+
+  <script>
+    var page = 1;
+    var isLoading = false;
+
+    function loadMorePosts() {
+      if (!isLoading) {
+        isLoading = true;
+        $('#loading').show();
+
+        $.ajax({
+          url: '/get_posts?page=' + page,
+          method: 'GET',
+          dataType: 'json',
+          success: function (data) {
+            if (data.posts.length > 0) {
+              // Append the new posts to the posts container
+              var postTemplate = $('#post-card-template').html();
+              var renderedPosts = Mustache.render(postTemplate, { posts: data.posts });
+              $('#posts-container').append(renderedPosts);
+
+              if (data.has_next) {
+                isLoading = false;
+                $('#loading').hide();
+                page++;
+              } else {
+                // No more posts to load
+                $('#loading').html('No more posts.');
+              }
+            }
+          },
+          error: function () {
+            isLoading = false;
+            $('#loading').hide();
+          }
+        });
+      }
+    }
+
+    // Load more posts when the user scrolls to the bottom of the page
+    $(window).scroll(function () {
+      if ($(window).scrollTop() + $(window).height() >= $(document).height() - 200) {
+        loadMorePosts();
+      }
+    });
+
+    // Initial loading of posts
+    loadMorePosts();
+  </script>
+
 {% endblock %}
