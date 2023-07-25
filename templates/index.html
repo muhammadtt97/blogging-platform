@@ -2,6 +2,11 @@
 
 {% block content %}
   <h1>Welcome to the Blogging Platform</h1>
+  <form action="/" method="post">
+    <input type="text" name="search_query" placeholder="Search...">
+    <button type="submit">Search</button>
+  </form>
+
   {% for post in posts.items %}
     <div class="post">
       <h2>{{ post.title }}</h2>

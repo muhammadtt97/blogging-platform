@@ -53,11 +53,17 @@ def load_user(user_id):
     except Exception as e:
         return None
 
-@app.route('/')
+@app.route('/',methods=['GET', 'POST'])
 def index():
     page = request.args.get('page', 1, type=int)
     posts_per_page = 5  # Number of blog posts per page
-    posts = Post.query.order_by(Post.id.desc()).paginate(page=page, per_page=posts_per_page)
+
+    if request.method == 'POST':
+        search_query = request.form.get('search_query', '')
+        posts = Post.query.filter(Post.title.contains(search_query) | Post.content.contains(search_query)).paginate(page=page, per_page=posts_per_page)
+    else:
+        posts = Post.query.order_by(Post.id.desc()).paginate(page=page, per_page=posts_per_page)
+
     return render_template('index.html', posts=posts)
 
 @app.route('/create', methods=['GET', 'POST'])
